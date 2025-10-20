@@ -1,0 +1,7 @@
+# client
+resume_client/node_modules
+
+
+# server
+resume_server/node_modules
+resume_server/.env
