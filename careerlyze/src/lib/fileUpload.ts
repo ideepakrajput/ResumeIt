@@ -1,6 +1,5 @@
 import { writeFile, unlink } from "fs/promises";
 import { join } from "path";
-import { randomUUID } from "crypto";
 
 export async function saveUploadedFile(
   file: File
@@ -11,8 +10,10 @@ export async function saveUploadedFile(
   // Create uploads directory if it doesn't exist
   const uploadsDir = join(process.cwd(), "uploads");
 
-  // Generate unique filename
-  const filename = `${randomUUID()}-${file.name}`;
+  // Generate unique filename using timestamp and random number
+  const timestamp = Date.now();
+  const randomNum = Math.random().toString(36).substring(2, 15);
+  const filename = `${timestamp}-${randomNum}-${file.name}`;
   const filePath = join(uploadsDir, filename);
 
   // Write file to disk

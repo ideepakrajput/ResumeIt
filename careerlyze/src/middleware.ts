@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken } from "@/lib/auth-simple";
 
 export function middleware(request: NextRequest) {
   const token = request.headers.get("authorization")?.replace("Bearer ", "");

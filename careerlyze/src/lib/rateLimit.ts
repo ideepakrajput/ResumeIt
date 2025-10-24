@@ -1,6 +1,12 @@
 // Simple in-memory rate limiter
 // In production, use Redis or a proper rate limiting service
-const requestCounts = new Map<string, { count: number; resetTime: number }>();
+// Using globalThis to avoid edge runtime issues
+const requestCounts =
+  (globalThis as any).rateLimitMap ||
+  new Map<string, { count: number; resetTime: number }>();
+if (!(globalThis as any).rateLimitMap) {
+  (globalThis as any).rateLimitMap = requestCounts;
+}
 
 export function rateLimit(
   identifier: string,

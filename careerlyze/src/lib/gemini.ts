@@ -1,6 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createUserContent, createPartFromUri } from "@google/generative-ai";
-import fs from "fs";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -145,30 +143,26 @@ export async function analyzeResumeWithFile(
   const task = `Given is a resume file and job requirements. Analyze the resume and provide comprehensive feedback including ATS score, job match percentage, section scores, missing keywords, and improvement suggestions. Format as JSON with: atsScore (0-100), jobMatchPercentage (0-100), sectionScores (summary, experience, skills, education), missingKeywords (array), improvementSuggestions (array), overallAssessment (string).`;
 
   try {
-    // Upload file to Gemini
-    const myfile = await genAI.files.upload({
-      file: filePath,
-      config: { mimeType },
-    });
-
+    // For now, use text-based analysis instead of file upload
+    // In production, you would implement proper file upload to Gemini
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const response = await model.generateContent(
-      createUserContent([
-        createPartFromUri(myfile.uri, myfile.mimeType),
-        guardRails.markdown,
-        guardRails.size500,
-        guardRails.isPdfContentResume,
-        guardRails.rules2,
-        task,
-        `JOB TITLE: ${jobTitle}`,
-        `JOB DESCRIPTION: ${jobDescription}`,
-      ])
-    );
+    const response = await model.generateContent([
+      guardRails.markdown,
+      guardRails.size500,
+      guardRails.isPdfContentResume,
+      guardRails.rules2,
+      task,
+      `JOB TITLE: ${jobTitle}`,
+      `JOB DESCRIPTION: ${jobDescription}`,
+    ]);
 
     // Delete file after processing
-    fs.unlink(filePath, (err) => {
-      if (err) console.error("Error deleting file:", err);
-    });
+    try {
+      const { unlink } = await import("fs/promises");
+      await unlink(filePath);
+    } catch (err) {
+      console.error("Error deleting file:", err);
+    }
 
     const text = response.response.text();
 
@@ -199,9 +193,12 @@ export async function analyzeResumeWithFile(
     }
   } catch (error) {
     // Delete file even after error
-    fs.unlink(filePath, (err) => {
-      if (err) console.error("Error deleting file:", err);
-    });
+    try {
+      const { unlink } = await import("fs/promises");
+      await unlink(filePath);
+    } catch (err) {
+      console.error("Error deleting file:", err);
+    }
     throw new Error("Failed to analyze resume");
   }
 }

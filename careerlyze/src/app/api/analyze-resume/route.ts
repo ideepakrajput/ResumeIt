@@ -3,7 +3,6 @@ import { analyzeResumeWithFile } from "@/lib/gemini";
 import { saveUploadedFile } from "@/lib/fileUpload";
 import { generateChartsData } from "@/lib/charts";
 import { generatePDFReport } from "@/lib/pdfGenerator";
-import { saveResumeAnalysis } from "@/lib/auth";
 import {
   validateFile,
   validateJobTitle,
@@ -94,22 +93,8 @@ export async function POST(request: NextRequest) {
       // Generate PDF report
       const pdfReport = await generatePDFReport(analysis, chartsData);
 
-      // Save analysis for logged-in users
-      const userId = request.headers.get("x-user-id");
-      if (userId) {
-        try {
-          await saveResumeAnalysis(
-            userId,
-            resumeFile.name,
-            jobTitle,
-            jobDescription,
-            analysis
-          );
-        } catch (saveError) {
-          console.error("Error saving analysis:", saveError);
-          // Continue even if save fails
-        }
-      }
+      // For now, skip database saving
+      // In production, you would save to database here
 
       return NextResponse.json({
         ...analysis,

@@ -1,8 +1,5 @@
-# 🚀 Build Your MCA Project — "Careerlyze" (AI-Powered Resume Evaluation & Job Fit System)
-
-**Create a simple Next.js app with a single API endpoint that handles everything!**
-
----
+1. **Build your MCA project — “Careerlyze”** (AI-Powered Resume Evaluation & Job Fit System) using **Next.js + Node.js + MongoDB + Gemini API **
+2. **Create your project report in Markdown** (which you can later convert to `.docx` or `.pdf` for university submission).
 
 # 🧠 Project Overview
 
@@ -18,583 +15,252 @@ Smart AI assistant that evaluates resumes, provides ATS compatibility scores, an
 
 ## 🎯 Objective
 
-Build a **Next.js web application** with a **single API endpoint** that takes a resume file, job title, and job description, then returns comprehensive analysis including:
+The goal of **Careerlyze** is to build a **web-based AI-driven platform** that automates resume analysis and job-fit evaluation using Natural Language Processing (NLP).
 
-1. **ATS Score Analysis** - Resume quality scoring (0-100)
-2. **Job Match Analysis** - Resume vs job description comparison
-3. **Improvement Suggestions** - Personalized tips to boost ATS score
-4. **Visual Charts** - Interactive charts showing scores and recommendations
-5. **PDF Report** - Downloadable comprehensive report
+The system will:
 
----
+- Extract and analyze resume text.
+- Provide an **ATS score** and **section completeness score**.
+- Recommend improvements (skills, structure, missing keywords).
+- Compare resume content with a **job description** to estimate a **match percentage**.
 
-# 🛠️ Application Architecture
-
-## **Authentication System**
-
-- **User Registration/Login** with email and password
-- **JWT tokens** for session management
-- **Protected routes** for authenticated users
-- **User-specific resume storage** in MongoDB
-
-## **API Endpoints**
-
-### **1. Auth Endpoints:**
-
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-
-### **2. Resume Analysis Endpoint:**
-
-- `POST /api/analyze-resume` - Upload resume file + job details → Complete analysis
-
-### **3. Admin Endpoints:**
-
-- `GET /api/admin/resumes` - Get all resume analyses (paginated)
-- `GET /api/admin/users` - Get all users
-- `DELETE /api/admin/resume/:id` - Delete specific analysis
-
-## **File Upload Approach**
-
-Using **multer** for file handling like your existing server:
-
-- Upload resume file to `/uploads` directory
-- Parse file content using Gemini API
-- Store analysis results in MongoDB with user association
-
-## **Database Schema**
-
-```json
-{
-  "users": {
-    "email": "user@example.com",
-    "password": "hashed_password",
-    "createdAt": "timestamp"
-  },
-  "resume_analyses": {
-    "userId": "user_id",
-    "fileName": "resume.pdf",
-    "jobTitle": "Software Engineer",
-    "jobDescription": "Job description...",
-    "analysis": {
-      "atsScore": 85,
-      "jobMatchPercentage": 78,
-      "sectionScores": {...},
-      "missingKeywords": [...],
-      "improvementSuggestions": [...]
-    },
-    "createdAt": "timestamp"
-  }
-}
-```
+This helps students, job seekers, and recruiters quickly understand resume quality and alignment.
 
 ---
 
-# 🧩 Implementation Plan
-
-## **Phase 1: Project Setup**
-
-### **1. Create Next.js App**
-
-```bash
-npx create-next-app@latest careerlyze --typescript --tailwind --eslint --app
-cd careerlyze
-```
-
-### **2. Install Dependencies**
-
-```bash
-npm install @google/generative-ai multer jspdf html2canvas chart.js react-chartjs-2
-npm install @tanstack/react-query axios jsonwebtoken bcryptjs
-npm install @types/multer @types/jsonwebtoken @types/bcryptjs
-```
-
-### **3. Environment Setup**
-
-Create `.env.local`:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-NEXTAUTH_URL=http://localhost:3000
-```
+# 🧩 Phase-wise Development Plan (MCA Report Style)
 
 ---
 
-## **Phase 2: Core API Implementation**
+## **Phase 1: Identification Phase**
 
-### **Single API Route: `app/api/analyze-resume/route.ts`**
+### **Problem Definition**
 
-```typescript
-import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+Manual resume review is time-consuming and subjective. Recruiters often filter candidates using ATS (Applicant Tracking Systems) that rely on keyword-based scoring, but most applicants don’t know how their resumes perform in such systems.
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+**Careerlyze** solves this by using AI to evaluate resumes, providing feedback and recommendations automatically.
 
-export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData();
-    const resumeFile = formData.get("resumeFile") as File;
-    const jobTitle = formData.get("jobTitle") as string;
-    const jobDescription = formData.get("jobDescription") as string;
+---
 
-    // Convert file to text (implement file parsing)
-    const resumeText = await parseResumeFile(resumeFile);
+### **Objectives**
 
-    // Single comprehensive AI prompt
-    const prompt = `
-    Analyze this resume and provide comprehensive feedback:
+1. Automate resume screening and scoring using AI.
+2. Provide real-time, actionable suggestions for resume improvement.
+3. Match resumes against job descriptions to predict job fit.
+4. Build a scalable web app using the MERN/Next.js stack.
 
-    RESUME:
-    ${resumeText}
+---
 
-    JOB TITLE: ${jobTitle}
-    JOB DESCRIPTION: ${jobDescription}
+### **Scope**
 
-    Please provide a JSON response with:
-    1. ATS Score (0-100)
-    2. Job Match Percentage (0-100)
-    3. Section Scores (summary, experience, skills, education)
-    4. Missing Keywords from job description
-    5. 5 Improvement Suggestions
-    6. Overall Assessment
+- Users: Students, Job seekers, Recruiters.
+- Platform: Web-based (Next.js) + optional mobile app (React Native).
+- AI Used: Gemini API or OpenAI API for NLP analysis.
+- Output: ATS score, job fit %, improvement points, and report.
 
-    Format as valid JSON only.
-    `;
+---
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const analysis = JSON.parse(response.text());
+### **Hardware & Software Requirements**
 
-    // Generate charts data
-    const chartsData = generateChartsData(analysis);
+| Type                | Details                                        |
+| ------------------- | ---------------------------------------------- |
+| **Hardware**        | Intel i5 or higher / 8GB RAM / 40GB HDD        |
+| **OS**              | Windows / macOS / Linux                        |
+| **Frontend**        | Next.js (React framework)                      |
+| **Backend**         | Node.js + Express                              |
+| **Database**        | MongoDB                                        |
+| **AI API**          | Gemini API / OpenAI API                        |
+| **Version Control** | Git + GitHub                                   |
+| **Deployment**      | Vercel (Frontend) / Render / Railway (Backend) |
 
-    // Generate PDF report
-    const pdfReport = await generatePDFReport(analysis, chartsData);
+---
 
-    return NextResponse.json({
-      ...analysis,
-      charts: chartsData,
-      pdfReport: pdfReport,
-    });
-  } catch (error) {
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
-  }
-}
+## **Phase 2: Development Phase**
+
+### **1. System Architecture**
+
+```
+User → Next.js Frontend → Node.js Backend → AI API → MongoDB
+```
+
+- **Frontend:** Handles user input (resume upload, job description).
+- **Backend:** API routes for AI processing and data handling.
+- **AI API:** Analyzes text and returns structured feedback.
+- **Database:** Stores user data, resumes, scores, and suggestions.
+
+---
+
+### **2. Folder Structure (Next + Node)**
+
+```
+careerlyze/
+├── frontend/
+│   ├── components/
+│   ├── pages/
+│   │   ├── index.tsx          // Home page
+│   │   ├── upload.tsx         // Resume upload form
+│   │   ├── results.tsx        // Display results
+│   ├── utils/
+│   ├── services/api.ts        // Backend API integration
+│   └── styles/
+│
+├── backend/
+│   ├── app.js                 // Express server
+│   ├── routes/
+│   │   ├── resumeRoutes.js
+│   ├── controllers/
+│   │   ├── resumeController.js
+│   ├── services/
+│   │   ├── aiService.js       // Gemini/OpenAI integration
+│   └── models/
+│       ├── User.js
+│       ├── Resume.js
+│
+└── database/
+    └── connect.js             // MongoDB connection
 ```
 
 ---
 
-## **Phase 3: Frontend Implementation**
+### **3. Core Modules**
 
-### **Main Page: `app/page.tsx`**
+#### **Module 1 – Resume Upload & Parsing**
 
-```typescript
-"use client";
-import { useState } from "react";
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Radar } from "react-chartjs-2";
+- Upload PDF/DOCX.
+- Extract text using libraries (e.g., `pdf-parse`, `mammoth`).
+- Send to backend for analysis.
 
-ChartJS.register(
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
+#### **Module 2 – AI Resume Evaluation**
 
-export default function Home() {
-  const [analysis, setAnalysis] = useState(null);
-  const [loading, setLoading] = useState(false);
+- AI analyzes extracted text using a prompt like:
 
-  const handleSubmit = async (formData: FormData) => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/analyze-resume", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await response.json();
-      setAnalysis(result);
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  ```
+  Analyze this resume text and give:
+  - ATS score out of 100
+  - Key missing skills
+  - Grammar or structure issues
+  - Summary of overall impression
+  ```
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Upload Form */}
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-center mb-8">Careerlyze</h1>
+- Parse AI response into structured JSON and store in MongoDB.
 
-        <form
-          action={handleSubmit}
-          className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg"
-        >
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Resume File
-            </label>
-            <input
-              type="file"
-              name="resumeFile"
-              accept=".pdf,.doc,.docx"
-              required
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
+#### **Module 3 – Job Fit Comparison**
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Job Title</label>
-            <input
-              type="text"
-              name="jobTitle"
-              required
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
+- User provides job description.
+- AI compares resume vs job description and gives match percentage:
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Job Description
-            </label>
-            <textarea
-              name="jobDescription"
-              rows={6}
-              required
-              className="w-full p-2 border rounded-md"
-            ></textarea>
-          </div>
+  ```
+  Compare resume vs job description.
+  Output match percentage and missing keywords.
+  ```
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? "Analyzing..." : "Analyze Resume"}
-          </button>
-        </form>
+#### **Module 4 – Improvement Suggestions**
 
-        {/* Results Display */}
-        {analysis && (
-          <div className="mt-8 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-4">Analysis Results</h2>
+- AI provides personalized tips to improve ATS score:
 
-              {/* Scores */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold">ATS Score</h3>
-                  <p className="text-3xl font-bold text-blue-600">
-                    {analysis.atsScore}/100
-                  </p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-semibold">Job Match</h3>
-                  <p className="text-3xl font-bold text-green-600">
-                    {analysis.jobMatchPercentage}%
-                  </p>
-                </div>
-              </div>
+  - Add missing technical skills.
+  - Reorder sections.
+  - Improve summary and action verbs.
 
-              {/* Charts */}
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-4">Section Analysis</h3>
-                <div className="h-64">
-                  <Radar data={analysis.charts.radarChart} />
-                </div>
-              </div>
+#### **Module 5 – Result Visualization**
 
-              {/* Improvement Suggestions */}
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-4">
-                  Improvement Suggestions
-                </h3>
-                <ul className="list-disc list-inside space-y-2">
-                  {analysis.improvementSuggestions.map((suggestion, index) => (
-                    <li key={index} className="text-gray-700">
-                      {suggestion}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+- Display AI results in charts (e.g., bar or radar chart using Chart.js).
+- Include overall score, section scores, and recommendations.
 
-              {/* Download Report */}
-              <button
-                onClick={() => downloadPDF(analysis.pdfReport)}
-                className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
-              >
-                Download PDF Report
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-```
+#### **Module 6 – Report Generation**
+
+- Generate downloadable report (PDF) summarizing all feedback.
+- Include charts and text sections.
 
 ---
 
-## **Phase 4: Helper Functions**
+### **4. Technology Stack**
 
-### **File Parsing: `lib/fileParser.ts`**
-
-```typescript
-export async function parseResumeFile(file: File): Promise<string> {
-  // Implement PDF/DOC parsing logic
-  // For now, return placeholder
-  return "Parsed resume text...";
-}
-```
-
-### **Charts Generation: `lib/charts.ts`**
-
-```typescript
-export function generateChartsData(analysis: any) {
-  return {
-    radarChart: {
-      labels: ["Summary", "Experience", "Skills", "Education"],
-      datasets: [
-        {
-          label: "Scores",
-          data: [
-            analysis.sectionScores.summary,
-            analysis.sectionScores.experience,
-            analysis.sectionScores.skills,
-            analysis.sectionScores.education,
-          ],
-          backgroundColor: "rgba(59, 130, 246, 0.2)",
-          borderColor: "rgba(59, 130, 246, 1)",
-          borderWidth: 2,
-        },
-      ],
-    },
-  };
-}
-```
-
-### **PDF Generation: `lib/pdfGenerator.ts`**
-
-```typescript
-import jsPDF from "jspdf";
-
-export async function generatePDFReport(
-  analysis: any,
-  charts: any
-): Promise<string> {
-  const pdf = new jsPDF();
-
-  // Add content to PDF
-  pdf.text("Resume Analysis Report", 20, 20);
-  pdf.text(`ATS Score: ${analysis.atsScore}/100`, 20, 40);
-  pdf.text(`Job Match: ${analysis.jobMatchPercentage}%`, 20, 50);
-
-  // Add more content...
-
-  return pdf.output("datauristring");
-}
-```
-
----
-
-## **Phase 5: Authentication Implementation**
-
-### **Auth Context: `contexts/AuthContext.tsx`**
-
-```typescript
-// Create authentication context for user management
-// Handle login, logout, and user state
-// JWT token management
-// Protected route logic
-```
-
-### **Auth API Routes:**
-
-- `app/api/auth/register/route.ts` - User registration
-- `app/api/auth/login/route.ts` - User login
-- `app/api/auth/logout/route.ts` - User logout
-
-### **Middleware: `middleware.ts`**
-
-```typescript
-// JWT token verification
-// Protected route protection
-// Admin route access control
-```
-
----
-
-## **Phase 6: Admin Dashboard**
-
-### **Admin Layout: `app/admin/layout.tsx`**
-
-```typescript
-// Admin dashboard layout
-// Navigation sidebar
-// User authentication check
-// Admin role verification
-```
-
-### **Admin Pages:**
-
-- `app/admin/page.tsx` - Dashboard overview
-- `app/admin/resumes/page.tsx` - All resume analyses table
-- `app/admin/users/page.tsx` - User management table
-
-### **TanStack Query Setup: `lib/queryClient.ts`**
-
-```typescript
-// Configure TanStack Query client
-// API endpoints configuration
-// Pagination setup
-// Error handling
-```
-
-### **Admin API Routes:**
-
-- `app/api/admin/resumes/route.ts` - Get paginated resume analyses
-- `app/api/admin/users/route.ts` - Get all users
-- `app/api/admin/resume/[id]/route.ts` - Delete specific analysis
-
-### **Data Tables with Pagination:**
-
-```typescript
-// TanStack Table implementation
-// Server-side pagination
-// Search and filtering
-// Export functionality
-```
-
----
-
-## **Phase 7: File Upload Integration**
-
-### **File Upload Handler: `lib/uploadHandler.ts`**
-
-```typescript
-// Multer configuration for file uploads
-// File validation (PDF, DOC, DOCX)
-// File storage in /uploads directory
-// File parsing for Gemini API
-```
-
-### **Updated Resume Analysis API:**
-
-```typescript
-// Integrate file upload with existing analysis
-// User association with analysis results
-// File cleanup after processing
-// Error handling for file operations
-```
-
----
-
-# 🎯 Technology Stack
-
-- **Framework:** Next.js 14 (App Router)
-- **Styling:** Tailwind CSS
-- **AI:** Google Gemini API
-- **Charts:** Chart.js + react-chartjs-2
-- **PDF:** jsPDF
-- **File Upload:** Multer
+- **Frontend:** Next.js + Tailwind CSS
+- **Backend:** Node.js + Express.js
 - **Database:** MongoDB Atlas
-- **Authentication:** JWT + bcryptjs
-- **State Management:** TanStack Query
-- **HTTP Client:** Axios
-- **Data Tables:** TanStack Table
-- **File Parsing:** Custom implementation or libraries
+- **AI API:** Gemini API / OpenAI API
+- **File Parsing:** pdf-parse, mammoth
+- **Visualization:** Chart.js / Recharts
+- **Auth (optional):** JWT or Clerk Auth
 
 ---
 
-# 📋 Development Checklist
+### **5. SDLC Phases**
 
-## **Core Setup**
-
-- [ ] Set up Next.js project
-- [ ] Install all dependencies
-- [ ] Configure MongoDB connection
-- [ ] Set up environment variables
-
-## **Authentication**
-
-- [ ] Create user registration API
-- [ ] Create user login API
-- [ ] Implement JWT middleware
-- [ ] Create AuthContext
-- [ ] Build login/register forms
-
-## **File Upload & Analysis**
-
-- [ ] Set up multer for file uploads
-- [ ] Create `/uploads` directory
-- [ ] Implement file parsing
-- [ ] Integrate Gemini AI with file upload
-- [ ] Update resume analysis API
-
-## **Frontend**
-
-- [ ] Create protected dashboard
-- [ ] Build resume upload form
-- [ ] Add charts visualization
-- [ ] Implement PDF generation
-- [ ] Add user-specific analysis history
-
-## **Admin Dashboard**
-
-- [ ] Create admin layout
-- [ ] Set up TanStack Query
-- [ ] Build admin API routes
-- [ ] Create paginated data tables
-- [ ] Add search and filtering
-- [ ] Implement admin authentication
-
-## **Testing & Deployment**
-
-- [ ] Test with sample resumes
-- [ ] Test authentication flow
-- [ ] Test admin functionality
-- [ ] Deploy to Vercel
+| Phase                    | Description                                  |
+| ------------------------ | -------------------------------------------- |
+| **Requirement Analysis** | Identify system functions, tools, and goals. |
+| **Design**               | Architecture, UI/UX, and data flow diagrams. |
+| **Implementation**       | Develop modules and integrate APIs.          |
+| **Testing**              | Functional and AI response testing.          |
+| **Deployment**           | Host on Vercel + Render.                     |
+| **Maintenance**          | Monitor and enhance AI feedback accuracy.    |
 
 ---
 
-# 🚀 Quick Start Command
+## **Phase 3: Project Report**
 
-```bash
-# Create the project
-npx create-next-app@latest careerlyze --typescript --tailwind --eslint --app
+### **Abstract**
 
-# Navigate to project
-cd careerlyze
+> Careerlyze is an AI-driven platform designed to evaluate resumes intelligently and provide ATS-based scoring and improvement recommendations. Using the MERN stack and NLP capabilities of AI APIs, Careerlyze assists job seekers in optimizing their resumes to align with industry requirements.
 
-# Install dependencies
-npm install @google/generative-ai multer jspdf html2canvas chart.js react-chartjs-2
-npm install @tanstack/react-query axios jsonwebtoken bcryptjs
-npm install @types/multer @types/jsonwebtoken @types/bcryptjs
+### **Introduction**
 
-# Create environment file
-echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
-echo "MONGODB_URI=your_mongodb_connection_string" >> .env.local
-echo "JWT_SECRET=your_jwt_secret_key" >> .env.local
-echo "NEXTAUTH_URL=http://localhost:3000" >> .env.local
+- Context: AI in recruitment and HR tech.
+- Problem: Manual resume screening inefficiency.
+- Solution: Automated AI-powered analysis.
 
-# Start development server
-npm run dev
-```
+### **Design**
 
-This approach gives you a **single, powerful API endpoint** that handles all resume analysis functionality in one request!
+- DFDs, UML diagrams (System Overview, Data Flow, Entity Relationship).
+
+### **Implementation**
+
+- Frontend: Next.js pages and components.
+- Backend: REST API routes in Express.
+- AI Integration: Calls to AI model using `fetch` or `axios`.
+- Database: User & resume schema in MongoDB.
+
+### **Testing**
+
+- Upload multiple resumes, validate parsing, compare outputs.
+- Validate AI responses for completeness and relevance.
+
+### **Application Screens**
+
+1. Homepage (upload section)
+2. Resume analysis result page
+3. Job match page
+4. Report generation
+
+### **Conclusion**
+
+Careerlyze bridges the gap between AI and job readiness by providing intelligent resume analytics. Future enhancements include integration with LinkedIn and real-time skill recommendation systems.
+
+### **Bibliography**
+
+- Gemini AI API Documentation
+- Next.js & MongoDB Developer Docs
+- Research papers on NLP in HR tech
+
+---
+
+# 🧾 Expected Output (Features Recap)
+
+| Feature                  | Description                         |
+| ------------------------ | ----------------------------------- |
+| Resume Upload            | PDF/DOCX parsing                    |
+| AI Resume Scoring        | ATS score + overall quality score   |
+| Job Description Matching | Fit percentage and missing keywords |
+| Suggestions              | AI-powered improvement feedback     |
+| Dashboard                | Graphs & charts showing progress    |
+| Report                   | PDF summary export                  |
+
+---
+
+# 📦 Deliverables
+
+1. Source Code (Frontend + Backend + DB)
+2. Live Deployed App (e.g., Vercel + Render link)
+3. Project Report (this Markdown → PDF)

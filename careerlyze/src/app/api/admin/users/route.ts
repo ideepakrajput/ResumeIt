@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllUsers } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +8,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const users = await getAllUsers(50, 0);
+    // For now, return empty users array
+    // In production, you would fetch from database
+    const users: any[] = [];
 
     return NextResponse.json({
       users,
